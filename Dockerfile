@@ -30,9 +30,9 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader && \
     npm install && npm run build || true
 
 # Laravel permission dan key
-RUN chown -R www-data:www-data /var/www/tailadmin && \
-    chmod -R 755 /var/www/tailadmin && \
-    php artisan key:generate
+RUN mkdir -p bootstrap/cache storage/framework/{sessions,views,cache} storage/logs && \
+    chown -R www-data:www-data . && \
+    chmod -R 775 bootstrap storage
 
 EXPOSE 80
 
