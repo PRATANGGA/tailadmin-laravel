@@ -11,7 +11,7 @@ env:
 
 jobs: 
   run-mysql:
-    run-on: self-hosted
+    runs-on: self-hosted
     steps: 
       - name: Delete container mysql if exist 
         continue-on-error: true
