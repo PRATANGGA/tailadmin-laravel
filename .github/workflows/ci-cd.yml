@@ -1,0 +1,53 @@
+name: Laravel Inersia 
+run-name: Build, Push and Deploy 
+on: 
+  push:
+    branches:
+      - main
+
+env: 
+  IMAGE_NAME: "${{ secrets.DOCKER_USER }}/julang_docker-tailadmin-laravel:beta"
+  DOCKER_USER: "${{ secrets.DOCKER_USER }}"
+
+jobs: 
+  run-mysql:
+    run-on: self-hosted
+    steps: 
+      - name: Delete container mysql if exist 
+        continue-on-error: true
+        run: docker rm -r $(docker ps -a | grep 'mysql\|social\|media' | awk '{print $1}')
+      - name: Running mysql in container 
+        run: docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=tailadmin -p 3306:3306 mysql 
+      - name: List docker container 
+        run: docker ps -a
+  build-push-image:
+    needs: run-mysql-in-docker
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository code 
+        uses: actions/checkout@v4
+      - name: Build Image 
+        uses: docker build -t $IMAGE_NAME .
+      - name: List Image
+        uses: docker/lgin-action@v3
+        with: 
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+      - name: Push Image 
+        run: docker push $IMAGE_NAME
+
+
+  deploy-to-registery:
+    needs: build-push-image
+    runs-on: self-hosted
+    steps: 
+      - name: Checkout repository 
+        uses: actions/checkout@v4
+      - name: stop and remove existing container 
+        uses: docker compose down --rmi all
+      - name: start container
+        run: docker compose up -d 
+
+
+
+

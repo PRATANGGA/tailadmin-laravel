@@ -1,0 +1,5 @@
+services:
+  web: 
+    image: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta
+    ports:
+      - "8090:8090"
