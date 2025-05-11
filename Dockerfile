@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 RUN apt update -y && \
-    DEBIAN_FRONTEND=noninterative apt install -y apache2 \
+    DEBIAN_FRONTEND=noninteractive apt install -y apache2 \
 install -y apache2 \
    php \
    npm \ 
