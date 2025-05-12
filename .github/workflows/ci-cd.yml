@@ -21,7 +21,7 @@ jobs:
 
       - name: Running mysql in container
         run: |
-          docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=tailadmin -p 3306:3306 mysql
+          docker run -d --name mysql --network app-network  -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=tailadmin -p 3306:3306 mysql
 
       - name: List docker containers
         run: docker ps -a

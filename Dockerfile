@@ -1,40 +1,37 @@
-FROM ubuntu:22.04
+FROM php:8.1-fpm 
 
-ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /var/www
 
-RUN apt update -y && \
-    apt install -y apache2 php php-xml php-curl php-mysql php-gd npm unzip curl php-cli
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    locales \
+    npm \
+    zip \
+    vim \
+    unzip \
+    git \
+    curl \
+    libzip-dev \
+    libpq-dev \
+    libonig-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer -o composer-setup.php && \
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-    rm composer-setup.php
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl 
 
-# Setup direktori aplikasi
-RUN mkdir -p /var/www/tailadmin
-WORKDIR /var/www/tailadmin
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy project ke container
-COPY . /var/www/tailadmin
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Salin konfigurasi Apache
-COPY tailadmin.conf /etc/apache2/sites-available/
+COPY . /var/www
 
-# Enable virtual host dan modul PHP
-RUN a2dissite 000-default.conf && \
-    a2ensite tailadmin.conf && \
-    a2enmod rewrite
+COPY --chown=www-data:www-data . /var/www
 
-# Install dependency Laravel
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader && \
-    npm install && npm run build || true
+USER www-data
 
-# Laravel permission dan key
-RUN mkdir -p bootstrap/cache storage/framework/{sessions,views,cache} storage/logs && \
-    chown -R www-data:www-data . && \
-    chmod -R 775 bootstrap storage
+EXPOSE 8090
 
-EXPOSE 80
-
-CMD ["apachectl", "-D", "FOREGROUND"]
-
+CMD["php-fpm"]
