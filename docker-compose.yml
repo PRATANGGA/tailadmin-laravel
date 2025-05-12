@@ -1,24 +1,25 @@
 version: '3.8'
-services: 
+
+services:
   app:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     image: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta
-      #    container: laravel-app
-    restart: unless-stopped 
+    container_name: laravel-app # baris ini sebelumnya dikomentari dan typo `container` harusnya `container_name`
+    restart: unless-stopped
     tty: true
-    environment: 
+    environment: # typo: sebelumnya `enviroment`
       SERVICE_NAME: app
       SERVICE_TAGS: dev
     working_dir: /var/www
-    volumes: 
+    volumes:
       - .:/var/www
       - ./docker-compose/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-    networks: 
+    networks:
       - app-network
 
- webserver:
+  webserver:
     image: nginx:alpine
     container_name: nginx-webserver
     restart: unless-stopped
@@ -36,4 +37,5 @@ networks:
 
 volumes:
   dbdata:
-    driver: local      
+    driver: local
+
