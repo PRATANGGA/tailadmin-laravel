@@ -7,50 +7,33 @@ on:
       - main
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/julang_docker-tailadmin-laravel:beta
-  DOCKER_USER: ${{ secrets.DOCKER_USER }}
+  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/docker-tailadmin-laravel:beta
 
 jobs:
-  run-mysql:
+  build-push:
     runs-on: self-hosted
     steps:
-      - name: Start MySQL
-        run: |
-          docker run -d --name mysql-db \
-            --network app-network \
-            -e MYSQL_ROOT_PASSWORD=password \
-            -e MYSQL_DATABASE=tailadmin \
-            -p 3306:3306 \
-            mysql:5.7
-
-  build-push-image:
-    needs: run-mysql
-    runs-on: self-hosted
-    steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build image
+      - name: Build Docker Image
         run: docker build -t $IMAGE_NAME .
 
-      - name: Login DockerHub
+      - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      - name: Push image
+      - name: Push Image
         run: docker push $IMAGE_NAME
 
   deploy:
-    needs: build-push-image
+    needs: build-push
     runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Stop containers
-        run: docker compose down --remove-orphans || true
+      - name: Stop existing containers
+        run: docker compose down || true
 
       - name: Start containers
         run: docker compose up -d
