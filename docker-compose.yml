@@ -3,7 +3,7 @@ services:
   app:
     build:
       context: .
-    image: ${DOCKER_USER}/docker-tailadmin-laravel:beta
+    image: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta
     container_name: laravel-app
     ports:
       - "8090:8090"
