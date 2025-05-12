@@ -7,26 +7,23 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
-    locales \
-    npm \
     zip \
-    vim \
     unzip \
     git \
     curl \
     libzip-dev \
-    libpq-dev \
     libonig-dev \
+    npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl gd
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . /var/www
-COPY --chown=www-data:www-data . /var/www
 
-USER www-data
+RUN chown -R www-data:www-data /var/www
 
-EXPOSE 9000
-CMD ["php-fpm"]
+EXPOSE 8090
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8090"]
 
