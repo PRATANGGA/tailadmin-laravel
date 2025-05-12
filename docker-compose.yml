@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     image: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta
-      #    container_name: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta # baris ini sebelumnya dikomentari dan typo `container` harusnya `container_name`
+    container_name: laravel-app
     restart: unless-stopped
     tty: true
-    environment: # typo: sebelumnya `enviroment`
+    environment:
       SERVICE_NAME: app
       SERVICE_TAGS: dev
     working_dir: /var/www
@@ -24,18 +24,26 @@ services:
     container_name: nginx-webserver
     restart: unless-stopped
     ports:
-      - "8090:8090"
+      - "8090:80"
     volumes:
       - .:/var/www
       - ./docker-compose/nginx:/etc/nginx/conf.d/
     networks:
       - app-network
 
+  mysql:
+    image: mysql
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: tailadmin
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  dbdata:
-    driver: local
 

@@ -11,30 +11,11 @@ env:
   DOCKER_USER: "${{ secrets.DOCKER_USER }}"
 
 jobs:
-  run-mysql:
+  build-push-deploy:
     runs-on: self-hosted
     steps:
-      - name: Delete container mysql if exist
-        continue-on-error: true
-        run: |
-          docker rm -f $(docker ps -a | grep 'mysql\|social\|media' | awk '{print $1}') || true
-
-      - name: Running mysql in container
-        run: |
-          docker run -d --name mysql --network app-network  -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=tailadmin -p 3306:3306 mysql
-
-      - name: List docker containers
-        run: docker ps -a
-
-  build-push-image:
-    needs: run-mysql
-    runs-on: self-hosted
-    steps:
-      - name: Checkout repository code
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: docker build -t $IMAGE_NAME .
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -42,19 +23,15 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      - name: Push Docker image
+      - name: Build Docker Image
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Push Docker Image
         run: docker push $IMAGE_NAME
 
-  deploy-to-registry:
-    needs: build-push-image
-    runs-on: self-hosted
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Stop and remove existing containers
+      - name: Stop & Remove Previous Containers
         run: docker compose down --rmi all || true
 
-      - name: Start containers
+      - name: Start New Containers
         run: docker compose up -d
 
