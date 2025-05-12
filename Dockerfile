@@ -34,4 +34,3 @@ USER www-data
 
 EXPOSE 8090
 
-#CMD["php-fpm"]
