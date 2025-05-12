@@ -29,3 +29,11 @@ services:
       - ./docker-compose/nginx:/etc/nginx/conf.d/
     networks:
       - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local      
