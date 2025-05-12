@@ -1,20 +1,38 @@
-FROM php:8.1-fpm
+FROM ubuntu:22.04
 
-WORKDIR /var/www
+RUN apt update -y && \
+    DEBIAN_FRONTEND=noninteractive apt install -y \
+    apache2 \
+    php \
+    php-cli \
+    php-mbstring \
+    php-xml \
+    php-curl \
+    php-mysql \
+    php-gd \
+    unzip \
+    nano \
+    curl \
+    git \
+    npm
 
-RUN apt-get update && apt-get install -y \
-    build-essential libpng-dev libjpeg-dev libfreetype6-dev \
-    zip unzip git curl libzip-dev libonig-dev npm \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql mbstring zip pcntl
+RUN curl -sS https://getcomposer.org/installer -o composer-setup.php && \
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN mkdir -p /var/www/tailadmin
+WORKDIR /var/www/tailadmin
 
-COPY . /var/www
-RUN chown -R www-data:www-data /var/www
+COPY . .
 
-USER www-data
+COPY sosmed.conf /etc/apache2/sites-available/
+RUN a2dissite 000-default.conf && a2ensite sosmed.conf && a2enmod rewrite
 
-EXPOSE 8090
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8090"]
+RUN mkdir -p bootstrap/cache storage/framework/{sessions,views,cache} storage/logs && \
+    chown -R www-data:www-data . && chmod -R 775 bootstrap storage
+
+RUN chmod +x install.sh && ./install.sh
+
+EXPOSE 80
+
+CMD ["apache2ctl", "-D", "FOREGROUND"]
 

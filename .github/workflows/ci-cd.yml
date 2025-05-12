@@ -1,22 +1,24 @@
-name: Laravel Inersia
-run-name: Build, Push and Deploy
+name: Build, Push and Deploy Laravel App
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKER_USER }}/docker-tailadmin-laravel:beta
-
+  IMAGE_NAME: "${{ secrets.DOCKER_USER }}julang_docker-tailadmin-laravel:beta"
+  DOCKER_USER: "${{ secrets.DOCKER_USER }}"
 jobs:
-  build-push:
+  deploy:
     runs-on: self-hosted
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
+      - name: Remove old containers (optional)
+        run: docker rm -f tailadmin-app mysql || true
+
+      - name: Build image
         run: docker build -t $IMAGE_NAME .
 
       - name: Login to DockerHub
@@ -25,16 +27,9 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      - name: Push Image
+      - name: Push image to DockerHub
         run: docker push $IMAGE_NAME
 
-  deploy:
-    needs: build-push
-    runs-on: self-hosted
-    steps:
-      - name: Stop existing containers
-        run: docker compose down || true
-
-      - name: Start containers
+      - name: Deploy with docker-compose
         run: docker compose up -d
 
