@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta
-    container_name: laravel-app # baris ini sebelumnya dikomentari dan typo `container` harusnya `container_name`
+    container_name: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta # baris ini sebelumnya dikomentari dan typo `container` harusnya `container_name`
     restart: unless-stopped
     tty: true
     environment: # typo: sebelumnya `enviroment`
@@ -24,7 +24,7 @@ services:
     container_name: nginx-webserver
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8090:8090"
     volumes:
       - .:/var/www
       - ./docker-compose/nginx:/etc/nginx/conf.d/
