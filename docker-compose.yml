@@ -20,7 +20,7 @@ services:
       SERVICE_NAME: app
       SERVICE_TAGS: dev
 
-  mysql:
+  mysql-db:
     image: mysql:5.7
     container_name: mysql
     restart: unless-stopped

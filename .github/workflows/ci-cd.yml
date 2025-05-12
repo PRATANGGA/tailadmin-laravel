@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Start MySQL
         run: |
-          docker run -d --name mysql \
+          docker run -d --name mysql-db \
             --network app-network \
             -e MYSQL_ROOT_PASSWORD=password \
             -e MYSQL_DATABASE=tailadmin \
