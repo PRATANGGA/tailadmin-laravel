@@ -20,8 +20,8 @@ jobs:
 
       - name: Build and push image
         run: |
-          docker build -t ${{ secrets.DOCKER_USER }}/tailadmin-laravel:beta .
-          docker push ${{ secrets.DOCKER_USER }}/tailadmin-laravel:beta
+          docker build -t ${{ secrets.DOCKER_USER }}/julang_docker-tailadmin-laravel:beta .
+          docker push ${{ secrets.DOCKER_USER }}/julang_docker-tailadmin-laravel:beta
 
       - name: Run Docker Compose
         run: |
