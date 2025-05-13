@@ -3,16 +3,24 @@ version: '3.8'
 services:
   app:
     image: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta
+    container_name: tailadmin-app
     ports:
       - "8090:80"
     depends_on:
       - mysql
+    environment:
+      APP_ENV: production
+      APP_DEBUG: false
+      DB_HOST: mysql
+      DB_DATABASE: tailadmin
+      DB_USERNAME: root
+      DB_PASSWORD: password
     networks:
       - tailadmin-network
 
   mysql:
     image: mysql:8.0
-    container_name: mysql
+    container_name: tailadmin-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: password
@@ -21,6 +29,11 @@ services:
       - mysql_data:/var/lib/mysql
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - tailadmin-network
 

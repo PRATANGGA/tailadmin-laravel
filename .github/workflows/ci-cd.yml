@@ -25,6 +25,6 @@ jobs:
 
       - name: Run Docker Compose
         run: |
-          docker compose down || true
+          docker compose down 
           docker compose up -d --build
 
