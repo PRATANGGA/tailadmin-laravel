@@ -8,6 +8,9 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    env:
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,13 +21,13 @@ jobs:
       - name: Login to DockerHub
         run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
 
-      - name: Build and push image
+      - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USER }}/julang_docker-tailadmin-laravel:beta .
-          docker push ${{ secrets.DOCKER_USER }}/julang_docker-tailadmin-laravel:beta
+          docker build -t $DOCKER_USER/julang_docker-tailadmin-laravel:beta .
+          docker push $DOCKER_USER/julang_docker-tailadmin-laravel:beta
 
       - name: Run Docker Compose
         run: |
-          docker compose down 
+          docker compose down || true
           docker compose up -d --build
 
