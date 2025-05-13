@@ -29,7 +29,7 @@ WORKDIR /var/www/tailadmin-laravel
 COPY . .
 
 # Apache config
-COPY sosmed.conf /etc/apache2/sites-available/
+COPY tailadmin.conf /etc/apache2/sites-available/
 RUN a2dissite 000-default.conf && a2ensite tailadmin.conf
 
 # Laravel folders and permissions
