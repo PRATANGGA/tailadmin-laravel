@@ -27,6 +27,6 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Install dependencies & setup app
 RUN ./install.sh
 
-EXPOSE 80
+EXPOSE 8090
 CMD ["apache2-foreground"]
 
