@@ -25,7 +25,7 @@ RUN chown -R www-data:www-data /var/www/tailadmin \
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install dependencies & setup app
-RUN chmod +x install.sh && ./install.sh
+RUN ./install.sh
 
 EXPOSE 80
 CMD ["apache2-foreground"]
