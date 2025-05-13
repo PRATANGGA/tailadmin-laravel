@@ -1,48 +1,32 @@
-FROM ubuntu:22.04
+FROM php:8.2-apache
 
 # Install dependencies
-RUN apt update -y && \
-    DEBIAN_FRONTEND=noninteractive apt install -y \
-    apache2 \
-    php \
-    php-cli \
-    php-mbstring \
-    php-xml \
-    php-curl \
-    php-mysql \
-    php-gd \
-    unzip \
-    nano \
-    curl \
-    git \
-    npm
+RUN apt-get update && apt-get install -y \
+    git curl unzip libzip-dev libpng-dev libonig-dev libxml2-dev npm \
+    && docker-php-ext-install pdo_mysql zip gd mbstring
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer -o composer-setup.php && \
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+# Enable Apache rewrite
+RUN a2enmod rewrite
 
-# Buat direktori project
-RUN mkdir -p /var/www/tailadmin-laravel
-WORKDIR /var/www/tailadmin-laravel
+# Set working dir
+WORKDIR /var/www/tailadmin
 
-# Copy project source code
+# Copy source code
 COPY . .
 
-# Apache config
-COPY tailadmin.conf /etc/apache2/sites-available/
-RUN a2dissite 000-default.conf && a2ensite tailadmin.conf
+# Copy Apache config
+COPY tailadmin.conf /etc/apache2/sites-available/000-default.conf
 
-# Laravel folders and permissions
-RUN mkdir -p bootstrap/cache storage/framework/{sessions,views,cache} storage/logs && \
-    chown -R www-data:www-data . && \
-    chmod -R 775 bootstrap storage
+# Set permissions
+RUN chown -R www-data:www-data /var/www/tailadmin \
+    && chmod -R 775 storage bootstrap/cache
 
-# Jalankan install.sh
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install dependencies & setup app
 RUN chmod +x install.sh && ./install.sh
 
-# Expose port Laravel (digunakan php artisan serve)
-EXPOSE 8000
-
-# Default CMD
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+EXPOSE 80
+CMD ["apache2-foreground"]
 
