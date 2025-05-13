@@ -9,7 +9,7 @@ npm install
 npm run build
 
 # 2. Setup .env
-cp -n .env.example .env
+cp .env.example .env
 
 # 3. Generate key
 php artisan key:generate
