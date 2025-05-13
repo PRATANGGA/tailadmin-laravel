@@ -1,30 +1,31 @@
 FROM php:8.2-apache
 
-# Install dependencies
+# Install extensions
 RUN apt-get update && apt-get install -y \
-    unzip zip curl git nano libzip-dev libpng-dev libonig-dev \
-    libxml2-dev npm nodejs \
-    && docker-php-ext-install pdo pdo_mysql zip mbstring gd
+    git unzip curl libpng-dev libonig-dev libxml2-dev zip npm \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl gd
 
-# Enable mod_rewrite
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Salin konfigurasi Apache
+# Set working dir
+WORKDIR /var/www/tailadmin
+
+# Copy source code
+COPY . .
+
+# Copy Apache config
 COPY tailadmin.conf /etc/apache2/sites-available/000-default.conf
 
-# Copy project
-COPY . /var/www/html
+# Copy install.sh
+COPY install.sh /usr/local/bin/install.sh
+RUN chmod +x /usr/local/bin/install.sh
 
-# Set permission
-RUN chown -R www-data:www-data /var/www/html && chmod -R 775 /var/www/html
-
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer
-
-# Jalankan install.sh
-RUN chmod +x install.sh && ./install.sh
+# Permissions
+RUN chown -R www-data:www-data /var/www/tailadmin \
+    && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 80
-CMD ["apache2-foreground"]
+
+CMD ["sh", "-c", "/usr/local/bin/install.sh && apache2-foreground"]
 

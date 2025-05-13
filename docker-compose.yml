@@ -1,8 +1,9 @@
+version: '3.8'
+
 services:
   app:
-    image: ${DOCKER_USER}/julang_docker-tailadmin-laravel:beta
-    build:
-      context: .
+    image: ${DOCKER_USER}/username_docker-tailadmin-laravel:beta
+    build: .
     ports:
       - "8090:80"
     depends_on:
@@ -19,6 +20,8 @@ services:
       MYSQL_DATABASE: tailadmin
     volumes:
       - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
     networks:
       - tailadmin-network
 
