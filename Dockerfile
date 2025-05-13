@@ -1,5 +1,6 @@
 FROM ubuntu:22.04
 
+# Install dependencies
 RUN apt update -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
     apache2 \
@@ -16,23 +17,32 @@ RUN apt update -y && \
     git \
     npm
 
+# Install Composer
 RUN curl -sS https://getcomposer.org/installer -o composer-setup.php && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
-RUN mkdir -p /var/www/tailadmin
-WORKDIR /var/www/tailadmin
+# Buat direktori project
+RUN mkdir -p /var/www/tailadmin-laravel
+WORKDIR /var/www/tailadmin-laravel
 
+# Copy project source code
 COPY . .
 
+# Apache config
 COPY sosmed.conf /etc/apache2/sites-available/
-RUN a2dissite 000-default.conf && a2ensite sosmed.conf && a2enmod rewrite
+RUN a2dissite 000-default.conf && a2ensite tailadmin.conf
 
+# Laravel folders and permissions
 RUN mkdir -p bootstrap/cache storage/framework/{sessions,views,cache} storage/logs && \
-    chown -R www-data:www-data . && chmod -R 775 bootstrap storage
+    chown -R www-data:www-data . && \
+    chmod -R 775 bootstrap storage
 
+# Jalankan install.sh
 RUN chmod +x install.sh && ./install.sh
 
-EXPOSE 80
+# Expose port Laravel (digunakan php artisan serve)
+EXPOSE 8000
 
-CMD ["apache2ctl", "-D", "FOREGROUND"]
+# Default CMD
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 

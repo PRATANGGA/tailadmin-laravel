@@ -1,24 +1,23 @@
-name: Build, Push and Deploy Laravel App
+name: Laravel Deployment
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 env:
-  IMAGE_NAME: "${{ secrets.DOCKER_USER }}julang_docker-tailadmin-laravel:beta"
+  IMAGE_NAME: "${{ secrets.DOCKER_USER }}/tailadmin-laravel:beta"
   DOCKER_USER: "${{ secrets.DOCKER_USER }}"
-jobs:
-  deploy:
-    runs-on: self-hosted
+  DOCKER_PASS: "${{ secrets.DOCKER_PASS }}"
 
+jobs:
+  build-push:
+    runs-on: self-hosted
     steps:
-      - name: Checkout repository
+      - name: Checkout repository code
         uses: actions/checkout@v4
 
-      - name: Remove old containers (optional)
-        run: docker rm -f tailadmin-app mysql || true
-
-      - name: Build image
+      - name: Build Docker image
         run: docker build -t $IMAGE_NAME .
 
       - name: Login to DockerHub
@@ -27,9 +26,21 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      - name: Push image to DockerHub
+      - name: Push Docker image
         run: docker push $IMAGE_NAME
 
-      - name: Deploy with docker-compose
-        run: docker compose up -d
+  deploy:
+    needs: build-push
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pull Docker image
+        run: docker pull $IMAGE_NAME
+
+      - name: Start containers with Docker Compose
+        run: |
+          docker-compose down
+          docker-compose up -d
 

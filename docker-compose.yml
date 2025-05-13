@@ -1,39 +1,35 @@
 version: '3.8'
 
 services:
-  app:
+  web:
     build:
       context: .
       dockerfile: Dockerfile
-    image: yourdockerusername/julang_docker-tailadmin-laravel:beta
-    container_name: laravel-app
+    container_name: tailadmin-laravel
     ports:
-      - "8090:80"
+      - "8090:8000"
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
     volumes:
-      - .:/var/www/html
+      - .:/var/www/tailadmin-laravel
     networks:
       - app-network
-    depends_on:
-      - mysql
+    restart: unless-stopped
 
   mysql:
     image: mysql:5.7
     container_name: mysql
-    restart: always
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: tailadmin
-    volumes:
-      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
     networks:
       - app-network
+    restart: unless-stopped
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  dbdata:
 
